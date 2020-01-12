@@ -91,10 +91,10 @@
                 $layer = array();
                 for ($i = 0; $i < $numNeuron; $i++){
                     if (sizeof($this->layers) == 0){
-                        $neu = new Neuron($neuron);
+                        $neu = new Neuron();
                         array_push($layer, $neu);
                     }else{
-                        $neu = new Neuron($neuron);
+                        $neu = new Neuron($this->layers[-1]);
                         array_push($layer, $neu);
                     }
                 }
