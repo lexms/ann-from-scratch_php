@@ -87,26 +87,28 @@
     class Network{
         function __construct($topology){
             $this->layers = array();
-            foreach ($topology as $key=>$item){
+            for ($numNeuron = 0; $numNeuron < count($topology); $numNeuron++){
                 $layer = array();
-                for ($i = 0; $i < $key; $i++){
+                for ($i = 0; $i < $numNeuron; $i++){
                     if (sizeof($this->layers) == 0){
                         $neu = new Neuron(0);
                         array_push($layer, $neu);
                     }else{
-                        if (sizeof($layer) > 0) {
-                            $neu = new Neuron($this->layers[sizeof($layer)-1]);
-                            array_push($layer, $neu);
-                        }
+                        $sliced_min1_layers = array_slice($this->layers, -1 );
+                        $neu = new Neuron($this->layers);
+                        array_push($layer, $neu);
                     }
                 }
                 $neu = new Neuron(0);
                 array_push($layer, $neu);
 
-                $layer[sizeof($layer)-1]->setOutput(1);
+                #array_slice($layer, -1)->setOutput(1);
+                $layer(count($layer) -1)->setOutput(1);
 
                 array_push($this->layers, $layer);
+                
             }
+
         }
         function setInput($inputs){
             for ($i = 0; $i < sizeof(inputs); $i++){
@@ -187,15 +189,15 @@
             $inputs = [[0, 0], [0, 1], [1, 0], [1, 1]];
             $outputs = [[0, 0], [1, 0], [1, 0], [0, 1]];
             for ($i = 0; $i < sizeof(inputs); $i++){
-                print("input: " . strval($inputs[$i] . " of " . strval($i) . " th input"));
+                print("input: " + strval($inputs[$i] + " of " + strval($i) + "th input"));
                 $net->setInput($inputs[$i]);
                 $net->feedForward();
                 $net->backPropagate($outputs[$i]);
-                print("output: " . strval($net->getResults()));
+                print("output: " + strval($net->getResults()));
                 $err += $net->getError($outputs[$i]);
 
                 $steps+=$firststep;
-                print("steps=  " . $steps);
+                print("steps=  " + $steps);
             }
             print ("error: " + $err);
             if($err <0.1){
