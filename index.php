@@ -68,7 +68,7 @@
                 return null;
             }
             foreach ($this->dendrons as $dendron){
-                $sumOutput += $this->dendron->get_connectedNeuron() * $this->dendron-> get_weight();
+                $sumOutput += $this->dendron->get_connectedNeuron()->getOutput() * $this->dendron-> get_weight();
             }
             $this->output = sigmoid($sumOutput);            
         }
@@ -91,7 +91,7 @@
                 $layer = array();
                 for ($i = 0; $i < $numNeuron; $i++){
                     if (sizeof($this->layers) == 0){
-                        $neu = new Neuron();
+                        $neu = new Neuron(0);
                         array_push($layer, $neu);
                     }else{
                         $neu = new Neuron($this->layers[-1]);
@@ -100,14 +100,113 @@
                 }
                 $neu = new Neuron();
                 array_push($layer, $neu);
-                $layer[-1]->setOutput(1);
+
+                array_slice($layer, -1)->setOutput(1);
 
                 array_push($this->layers, $layer);
                 
             }
 
         }
+        function setInput($inputs){
+            for ($i = 0; $i < sizeof(inputs); $i++){
+                $this->layers[0][$i]->setOutput(inputs[$i]);
+            }
+        }
+        function feedForward(){
+            foreach ($this->layers[1] as $layer){
+                for ($i = 0; $i < $layer; $i++){
+                    $neu = new Neuron($layer);
+                    $neu->feedForward();
+                } 
+            }
+        }
+
+        function backPropagate($target){
+            for ($i = 0 ; $i < sizeof($target); $i++){
+                $sliced_min1_layers = array_slice($this->layers, -1 );
+                $sliced_min1_layers[$i]->setError($target[$i]- $this->$sliced_min1_layers[$i]->getOutput());
+            }
+            foreach (array_reverse($this->layers) as $layer){
+                for ($i = 0; $i < $layer; $i++){
+                    $neu = new Neuron($layer);
+                    $neu->backPropagate();
+                } 
+                
+            }
+        }
+        function getError($target){
+            $err = 0;
+            for ($i = 0 ; $i < sizeof($target); $i++){
+                $sliced_min1_layers = array_slice($this->layers, -1 );
+                $e = ($target[$i] - $sliced_min1_layers[$i]->getOutput());
+                $err += pow($e,2);
+            }
+            $err /= sizeof($target);
+            $err = sqrt($err);
+        }
+        function getResults(){
+            $output = array();
+            for ($i = 0; $i < array_slice($this->layers, -1) ; $i++){
+                $neu = new Neuron($this->layers, -1);
+                array_push($output, $neu->getOutput());
+            }
+            return $output;
+        }
+        function getThResults(){
+            $output = array();
+            for ($i = 0; $i < array_slice($this->layers, -1) ; $i++){
+                $neu = new Neuron($this->layers, -1);
+                $o = $neu->getOutput();
+                if ($o > 0.5){
+                    $o = 1;
+                }else{
+                    $o = 0;
+                }
+                array_push($output, $o);
+            }
+            array_pop($output);
+            return $output;
+        }
     }
+
+    function main(){
+        $steps = 0;
+        $firststeps = 1;
+        $topology = array();
+        array_push($topology, 2);
+        array_push($topology, 3);
+        array_push($topology, 2);
+
+        $net = new Network($topology);
+        $learning_rate = 0.09;
+        $momentum = 0.015;
+
+        while(true==true){
+            $err = 0;
+            $inputs = [[0, 0], [0, 1], [1, 0], [1, 1]];
+            $outputs = [[0, 0], [1, 0], [1, 0], [0, 1]];
+            for ($i = 0; $i < sizeof(inputs); $i++){
+                print("input: " + strval($inputs[$i] + " of " + strval($i) + "th input"));
+                $net->setInput($inputs[$i]);
+                $net->feedForward();
+                $net->backPropagate($outputs[$i]);
+                print("output: " + strval($net->getResults()));
+                $err += $net->getError($outputs[$i]);
+
+                $steps+=$firststep;
+                print("steps=  " + $steps);
+            }
+            print ("error: " + $err);
+            if($err <0.1){
+                break;
+            }
+        }
+        
+    }
+
+    main();
+    
 
 
 
