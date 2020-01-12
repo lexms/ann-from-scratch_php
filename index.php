@@ -98,6 +98,12 @@
                         array_push($layer, $neu);
                     }
                 }
+                $neu = new Neuron();
+                array_push($layer, $neu);
+                $layer[-1]->setOutput(1);
+
+                array_push($this->layers, $layer);
+                
             }
 
         }
