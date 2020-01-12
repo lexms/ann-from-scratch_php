@@ -7,7 +7,7 @@
         function __construct($connectedNeuron){
             $this->connectedNeuron = $connectedNeuron;
         }   
-        public function get_connectedNeuron(){
+        function get_connectedNeuron(){
             return $this->connectedNeuron;
         }
         function nrand($mean, $sd){
@@ -68,16 +68,46 @@
                 return null;
             }
             foreach ($this->dendrons as $dendron){
-                $sumOutput += $this->dendron->get_connectedNeuron();
+                $sumOutput += $this->dendron->get_connectedNeuron() * $this->dendron-> get_weight();
             }
-            
-            
+            $this->output = sigmoid($sumOutput);            
+        }
+        function backPropagate(){
+            $this->gradient = $this->error * dsigmoid($this->output);
+            foreach ($this->dendrons as $dendron){
+                $this->dendron->dweight = $learning_rate * (
+                    $this->dendron->get_connectedNeuron()->$output * $this->gradient) + $this->momentum * $this->dendron->get_dweight();
+                    $this->dendron->weight += $this->dendron->get_dweight();
+            }
+            $this->error = 0;
         }
 
     }
 
+    class Network{
+        function __construct($topology){
+            $this->layers = array();
+            for ($numNeuron = 0; $numNeuron < $topology; $numNeuron++){
+                $layer = array();
+                for ($i = 0; $i < $numNeuron; $i++){
+                    if (sizeof($this->layers) == 0){
+                        $neu = new Neuron($neuron);
+                        array_push($layer, $neu);
+                    }else{
+                        $neu = new Neuron($neuron);
+                        array_push($layer, $neu);
+                    }
+                }
+            }
+
+        }
+    }
+
+
+
+/* 
     $neuron = new Neuron(5);
-    $neuron->feedForward();
+    $neuron->feedForward(); */
 
 
 ?>
