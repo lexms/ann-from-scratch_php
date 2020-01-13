@@ -37,7 +37,8 @@
             if ($layer = 0) {
                 //pass
             }else{
-                for ($i = 0; $i < $layer; $i++){
+                foreach ($layer as $neuron=>$value){
+                    #layer berisi object neuron
                     $con = new Connection($neuron);
                     array_push($this->dendrons, $con);
                 }
@@ -88,6 +89,8 @@
         private $layers = [];
         function __construct($topology){
             $this->layers = array();
+
+            # Push Neuron Object to Layer based on topology
             foreach ($topology as $key=>$item){
                 $layer = array();
                 for ($i = 0; $i < $item; $i++){
@@ -95,17 +98,19 @@
                         $neu = new Neuron(0);
                         array_push($layer, $neu);
                     }else{
-                        if (sizeof($layer) > 0) {
-                            $neu = new Neuron($this->layers[sizeof($layer)-1]);
-                            array_push($layer, $neu);
-                        }
+                        $neu = new Neuron($this->layers[sizeof($layer)-1]);
+                        array_push($layer, $neu);
+                        
                     }
                 }
+                #Push Neuron none
                 $neu = new Neuron(0);
                 array_push($layer, $neu);
 
+                #set output last layer to 1
                 $layer[sizeof($layer)-1]->setOutput(1);
 
+                #push another layer
                 array_push($this->layers, $layer);
             }
             print_r($this->layers);
@@ -119,7 +124,7 @@
             $sliced_1_nTheRest = array_slice($this->layers, 1);
             foreach ($sliced_1_nTheRest as $layer){
                 for ($i = 0; $i < $layer; $i++){
-                    $neu = new Neuron($layer);
+                    $neu = new Neuron($i);
                     $neu->feedForward();
                 } 
             }
