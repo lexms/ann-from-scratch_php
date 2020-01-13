@@ -85,11 +85,12 @@
     }
 
     class Network{
+        private $layers = [];
         function __construct($topology){
             $this->layers = array();
             foreach ($topology as $key=>$item){
                 $layer = array();
-                for ($i = 0; $i < $key; $i++){
+                for ($i = 0; $i < $item; $i++){
                     if (sizeof($this->layers) == 0){
                         $neu = new Neuron(0);
                         array_push($layer, $neu);
@@ -107,14 +108,16 @@
 
                 array_push($this->layers, $layer);
             }
+            print_r($this->layers);
         }
         function setInput($inputs){
-            for ($i = 0; $i < sizeof(inputs); $i++){
-                $this->layers[0][$i]->setOutput(inputs[$i]);
+            foreach ($inputs as $key=>$value){
+                $this->layers[0][$key]->setOutput($value);
             }
         }
         function feedForward(){
-            foreach ($this->layers[1] as $layer){
+            $sliced_1_nTheRest = array_slice($this->layers, 1);
+            foreach ($sliced_1_nTheRest as $layer){
                 for ($i = 0; $i < $layer; $i++){
                     $neu = new Neuron($layer);
                     $neu->feedForward();
@@ -144,6 +147,7 @@
             }
             $err /= sizeof($target);
             $err = sqrt($err);
+            return $err;
         }
         function getResults(){
             $output = array();
@@ -172,33 +176,31 @@
 
     function main(){
         $steps = 0;
-        $firststeps = 1;
-        $topology = array();
-        array_push($topology, 2);
-        array_push($topology, 3);
-        array_push($topology, 2);
-
+        $firststep = 1;
+        $topology = [2,3,2];
         $net = new Network($topology);
         $learning_rate = 0.09;
         $momentum = 0.015;
 
-        while(true==true){
+        for ($j = 0 ; $j < 10; $j++){
             $err = 0;
             $inputs = [[0, 0], [0, 1], [1, 0], [1, 1]];
             $outputs = [[0, 0], [1, 0], [1, 0], [0, 1]];
-            for ($i = 0; $i < sizeof(inputs); $i++){
-                print("input: " . strval($inputs[$i] . " of " . strval($i) . " th input"));
-                $net->setInput($inputs[$i]);
+            foreach ($inputs as $key=>$value){
+                print("input : ");
+                print_r($value);
+                print(" of " . strval($key) . " th input");
+                $net->setInput($value);
                 $net->feedForward();
-                $net->backPropagate($outputs[$i]);
+                $net->backPropagate($outputs[$key]);
                 print("output: " . strval($net->getResults()));
-                $err += $net->getError($outputs[$i]);
+                $err += $net->getError($outputs[$key]);
 
                 $steps+=$firststep;
                 print("steps=  " . $steps);
             }
-            print ("error: " + $err);
-            if($err <0.1){
+            print ("error: " . $err);
+            if($err < 1){
                 break;
             }
         }
@@ -209,10 +211,6 @@
     
 
 
-
-/* 
-    $neuron = new Neuron(5);
-    $neuron->feedForward(); */
 
 
 ?>
