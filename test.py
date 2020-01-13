@@ -7,6 +7,8 @@ class Connection:
         self.weight = np.random.normal()
         self.dWeight = 0.0
 
+    
+
 class Neuron:
     learning_rate = 0.001
     momentum = 0.01
@@ -42,6 +44,7 @@ class Network:
             layer = []
             for i in range(numNeuron):
                 if (len(self.layers) == 0):
+                    print(i)
                     layer.append(Neuron(None)) #yang masuk array layer itu neuron juga
                 else:
                     layer.append(Neuron(self.layers[-1]))
