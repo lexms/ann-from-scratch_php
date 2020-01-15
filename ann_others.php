@@ -1,6 +1,5 @@
 <!-- someone else's -->
 <?php
-namespace SimpleNeuralNetwork;
 class Net
 {
     const ALPHA = 0.9;
