@@ -1,27 +1,27 @@
+<!-- main revised program -->
 <?php
     class Connection{
         public $connectedNeuron;
-        public $weight;
-        public $dweight;
+        public $weight =0.1;
+        public $dweight = 0;
         
+        function nrand(){
+            return rand() / (getrandmax() - 1);
+        }
         function __construct($connectedNeuron){
             $this->connectedNeuron = $connectedNeuron;
         }   
         function get_connectedNeuron(){
             return $this->connectedNeuron;
         }
-        function nrand(){
-            return rand() / (getrandmax() - 1);
+        function set_weight($weight){
+            #$weight = $this->nrand();
+            $this->weight = $weight;  
+        }
+        function get_weight(){
+            return $this->weight;
         }
         
-        function get_weight(){
-            $weight = $this->nrand();
-            return $weight;
-        }  
-        function get_dweight(){
-            $dweight = 0;
-            return $dweight;
-        }
     }
 
     class Neuron{
@@ -33,14 +33,17 @@
         public $momentum = 0.01;
 
         function __construct($layer){
-            if ($layer == 0) {
+            if (sizeof($layer) == 0) {
                 //print("ini nggak masuk:  ");
                 return 0;
             }else{
                 //print("ini layer masuk:  ");
-                //print_r($layer);
+                #print_r($layer);
                 foreach ($layer as $neuron){
                     #layer berisi object neuron
+                    #print("<br>");
+                    #print_r($neuron);
+                    
                     $con = new Connection($neuron);
                     array_push($this->dendrons, $con);
                 }
@@ -66,7 +69,7 @@
             return $this->output;
         }
         function feedForward(){
-            $sumOutput = 0;
+            $sumOutput = 0.0;
             if (sizeof($this->dendrons) == 0){
                 return null;
             }
@@ -80,7 +83,7 @@
             foreach ($this->dendrons as $dendron){
                 $this->dendron->dweight = $learning_rate * (
                     $this->dendron->get_connectedNeuron()->$output * $this->gradient) + $this->momentum * $this->dendron->get_dweight();
-                    $this->dendron->weight += $this->dendron->get_dweight();
+                $this->dendron->weight += $this->dendron->get_dweight();
             }
             $this->error = 0;
         }
@@ -110,7 +113,7 @@
                 $neu = new Neuron(0);
                 array_push($layer, $neu);
 
-                #set output of all neoron in the last layer to 1
+                #Bias Neuron every last neuron in the layer.
                 foreach ($layer as $neuron){
                     $layer[sizeof($layer)-1]->setOutput(1);
                 }

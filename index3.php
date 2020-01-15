@@ -1,3 +1,4 @@
+<!-- someone else's -->
 <?php
 namespace SimpleNeuralNetwork;
 class Net

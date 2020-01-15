@@ -1,3 +1,4 @@
+<!-- second attempt revised program -->
 <?php
     class Connection{
         public $connectedNeuron;
