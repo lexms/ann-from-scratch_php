@@ -1,27 +1,28 @@
-<!-- main revised program -->
 <?php
     class Connection{
         public $connectedNeuron;
-        public $weight =0.1;
-        public $dweight = 0;
+        public $weight;
+        public $dweight;
         
-        function nrand(){
-            return rand() / (getrandmax() - 1);
-        }
         function __construct($connectedNeuron){
             $this->connectedNeuron = $connectedNeuron;
         }   
         function get_connectedNeuron(){
             return $this->connectedNeuron;
         }
-        function set_weight($weight){
-            #$weight = $this->nrand();
-            $this->weight = $weight;  
+        function nrand($mean, $sd){
+            $x = mt_rand()/mt_getrandmax();
+            $y = mt_rand()/mt_getrandmax();
+            return sqrt(-2*log($x))*cos(2*pi()*$y)*$sd + $mean;
         }
         function get_weight(){
-            return $this->weight;
+            $weight = nrand(0,1);
+            return $weight;
         }
-        
+        function get_dweight(){
+            $dweight = 0;
+            return $dweight;
+        }
     }
 
     class Neuron{
@@ -31,21 +32,14 @@
         public $output = 0.0;
         public $learning_rate = 0.001;
         public $momentum = 0.01;
-
+        
         function __construct($layer){
             print('layer-neuron:  ');
-        print_r($layer);
-            if (sizeof($layer) == 0) {
-                //print("ini nggak masuk:  ");
-                return 0;
+            print_r($layer);print('');
+            if ($layer = 0) {
+                //pass
             }else{
-                //print("ini layer masuk:  ");
-                #print_r($layer);
-                foreach ($layer as $neuron){
-                    #layer berisi object neuron
-                    #print("<br>");
-                    #print_r($neuron);
-                    
+                for ($i = 0; $i < $layer; $i++){
                     $con = new Connection($neuron);
                     array_push($this->dendrons, $con);
                 }
@@ -71,21 +65,21 @@
             return $this->output;
         }
         function feedForward(){
-            $sumOutput = 0.0;
+            $sumOutput = 0;
             if (sizeof($this->dendrons) == 0){
                 return null;
             }
             foreach ($this->dendrons as $dendron){
-                $sumOutput += $dendron->get_connectedNeuron()->getOutput() * $dendron->get_weight();
+                $sumOutput += $this->dendron->get_connectedNeuron()->getOutput() * $this->dendron-> get_weight();
             }
-            $this->output = $this->sigmoid($sumOutput);            
+            $this->output = sigmoid($sumOutput);            
         }
         function backPropagate(){
             $this->gradient = $this->error * dsigmoid($this->output);
             foreach ($this->dendrons as $dendron){
                 $this->dendron->dweight = $learning_rate * (
                     $this->dendron->get_connectedNeuron()->$output * $this->gradient) + $this->momentum * $this->dendron->get_dweight();
-                $this->dendron->weight += $this->dendron->get_dweight();
+                    $this->dendron->weight += $this->dendron->get_dweight();
             }
             $this->error = 0;
         }
@@ -96,8 +90,6 @@
         private $layers = [];
         function __construct($topology){
             $this->layers = array();
-
-            # Push Neuron Object to Layer based on topology
             foreach ($topology as $key=>$item){
                 $layer = array();
                 for ($i = 0; $i < $item; $i++){
@@ -105,27 +97,20 @@
                         $neu = new Neuron(0);
                         array_push($layer, $neu);
                     }else{
-                        $sliced_min1_layers = array_slice($this->layers, -1 );
-                        $neu = new Neuron($sliced_min1_layers);
-                        array_push($layer, $neu);
-                        
+                        if (sizeof($layer) > 0) {
+                            $neu = new Neuron($this->layers[sizeof($layer)-1]);
+                            array_push($layer, $neu);
+                        }
                     }
-                    
                 }
-                #Push Neuron none
                 $neu = new Neuron(0);
                 array_push($layer, $neu);
 
-                #Bias Neuron every last neuron in the layer.
-                foreach ($layer as $neuron){
-                    $layer[sizeof($layer)-1]->setOutput(1);
-                }
+                $layer[sizeof($layer)-1]->setOutput(1);
 
-                #push another layer
                 array_push($this->layers, $layer);
             }
-            //print_r($layer);
-            //print_r($this->layers);
+            print_r($this->layers);
         }
         function setInput($inputs){
             foreach ($inputs as $key=>$value){
@@ -133,8 +118,7 @@
             }
         }
         function feedForward(){
-            $sliced_1_nTheRest = array_slice($this->layers, 1);
-            foreach ($sliced_1_nTheRest as $layer){
+            foreach ($this->layers[1] as $layer){
                 for ($i = 0; $i < $layer; $i++){
                     $neu = new Neuron($layer);
                     $neu->feedForward();
@@ -199,7 +183,7 @@
         $learning_rate = 0.09;
         $momentum = 0.015;
 
-        for ($j = 0 ; $j < 10; $j++){
+        while(true==true){
             $err = 0;
             $inputs = [[0, 0], [0, 1], [1, 0], [1, 1]];
             $outputs = [[0, 0], [1, 0], [1, 0], [0, 1]];
@@ -217,7 +201,7 @@
                 print("steps=  " . $steps);
             }
             print ("error: " . $err);
-            if($err < 3){
+            if($err < 0.1){
                 break;
             }
         }
@@ -228,6 +212,10 @@
     
 
 
+
+/* 
+    $neuron = new Neuron(5);
+    $neuron->feedForward(); */
 
 
 ?>

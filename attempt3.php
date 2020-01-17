@@ -2,46 +2,32 @@
 <?php
 
 class Connection{
-    private $connectedNeuron;
-    private $weight;
-    private $dweight;
+    public $connectedNeuron;
+        public $weight =0.1;
+        public $dweight = 0;
     function __construct($connectedNeuron){
         $this->connectedNeuron = $connectedNeuron;
-        $this->weight = 0.1;
-        $this->dweight = 0;
     }
 
     function getconnectedNeuron(){
         return $this->connectedNeuron;
     }
-    function getdweight(){
-        return $this->dweight;
-    }
-    function setdweight($dweight){
-        $this->dweight = $dweight;  
-    }
+
 }
 
 class Neuron{
-    private $dendrons;
-    private $error;
-    private $gradient;  #which direction to minimize the error
-    private $output; 
-    private $learning_rate;
-    private $momentum; #changing the weight of the previous weight
+    public $dendrons = array();
+    public $error = 0.0;
+    public $gradient = 0.0;  #which direction to minimize the error
+    public $output = 0.0;
+    public $learning_rate = 0.001;
+    public $momentum = 0.01; #changing the weight of the previous weight
+    public $layer;
 
-
-    function __construct($layer){
-        $this->$dendrons = array();
-        $this->$error = 0.0;
-        $this->$output = 0.0;
-        $this->$gradient = 0.0; #which direction to minimize the error
-        
-        $this->$learning_rate = 0.001;
-        $this->$momentum = 0.01; #changing the weight of the previous weight
-
-
-        if(sizeof($layer)==0){
+    public function __construct($layer){
+        print('layer-neuron:  ');
+        print_r($layer);
+        if(sizeof($layer) == 0){
             return 0;
         }else{
             foreach ($layer as $neuron){
@@ -102,23 +88,31 @@ class Neuron{
     }
 }
 
+
 class Network{
     private $layers;
-    function __construct($topology){
+    public function __construct($topology){
         $this->layers = array();
 
-        foreach ($topology as $numNeuron){
+        foreach ($topology as $key=> $numNeuron){
             $layer = array();
-            for ($i = 0; $i < sizeof($numNeuron); $i++){
+            for ($i = 0; $i < $numNeuron; $i++){
+                # 
                 if (sizeof($this->layers) == 0){
-                    $neuron = new Neuron(0);
-                    
+                   
+                    $neuron = new Neuron(null);
+
+                    array_push($layer, $neuron);
                 }else{
+                    #print('size of layerss =  '.sizeof($this->layers).' <br>'); CONFIRMED
                     $sliced_min1_layers = array_slice($this->layers, -1 );
                     $neuron = new Neuron($sliced_min1_layers);
-                    
+                    array_push($layer, $neuron);
                 }
-                array_push($layer, $neuron);
+                print('layer-network:  ');
+                print_r($layer);
+                print('<br>');
+               
             }
 
             #add bias neuron
@@ -148,6 +142,7 @@ class Network{
     function backPropagate($targets){
         #target 
         for ($i = 0; $i < sizeof($target); $i++){
+            #
             array_slice($this->layers, -1 )[i]->setError($target[i]- array_slice($this->layers, -1 )[i]->getOutput());
         }
         foreach (array_reverse($this->layers) as $layer){
@@ -167,14 +162,70 @@ class Network{
         return $err;
     }
 
+    function getResults(){
+        $output = array();
+        foreach (array_slice($this->layers, -1) as $neuron){
+            array_push($output, $neuron->getOutput());
+        }
+        array_pop($output);
+        return $output;
+    }
+
+    function getThResults(){
+        $output = array();
+        foreach (array_slice($this->layers, -1) as $neuron){
+            $o = $neuron->getOutput();
+            if ($o > 0.5){
+                $o = 1;
+            }else{
+                $o = 0;
+            }
+            array_push($output, $o);
+        }
+        array_pop($output);
+
+        return $output;
+    }
+
 
 
 
 }
 
 function main(){
+    $steps = 0;
+    $firststep = 1;
+    $topology = [2,3,2];
+    $net = new Network($topology);
+    $learning_rate = 0.09;
+    $momentum = 0.015;
 
+    for ($j = 0 ; $j < 10; $j++){
+        $err = 0;
+        $inputs = [[0, 0], [0, 1], [1, 0], [1, 1]];
+        $outputs = [[0, 0], [1, 0], [1, 0], [0, 1]];
+        foreach ($inputs as $key=>$value){
+            print("input : ");
+            #print_r($value);
+            print(" of " . strval($key) . " th input");
+            $net->setInput($value);
+            $net->feedForward();
+            $net->backPropagate($outputs[$key]);
+            print("output: " . strval($net->getResults()));
+            $err += $net->getError($outputs[$key]);
+
+            $steps+=$firststep;
+            print("steps=  " . $steps);
+        }
+        print ("error: " . $err);
+        if($err < 3){
+            break;
+        }
+    }
+    
 }
+
+main();
 
 
 
